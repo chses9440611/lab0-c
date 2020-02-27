@@ -22,9 +22,17 @@ queue_t *q_new()
 /* Free all storage used by queue */
 void q_free(queue_t *q)
 {
-    /* TODO: How about freeing the list elements and the strings? */
-    /* Free queue structure */
-    free(q);
+    // when q is not NULL, we do free(q), free node from head
+    if (q != NULL) {
+        while (q->size > 0) {
+            list_ele_t *tmp = q->head;
+            q->head = q->head->next;
+            free(tmp->value);
+            free(tmp);
+            q->size--;
+        }
+        free(q);
+    }
 }
 
 /*
@@ -37,12 +45,35 @@ void q_free(queue_t *q)
 bool q_insert_head(queue_t *q, char *s)
 {
     list_ele_t *newh;
-    /* TODO: What should you do if the q is NULL? */
+    int length;
+
     newh = malloc(sizeof(list_ele_t));
+    if (!newh) {
+        printf("Fail to malloc a node\n");
+        return false;
+    }
+    // get the string length of s, not including '\0'
+    length = strlen(s);
+    newh->value = malloc(length + 1);
+    // if fail to malloc value, also free the node newh
+    if (!newh->value) {
+        printf("Fail to malloc value\n");
+        free(newh);
+        return false;
+    }
+    strncpy(newh->value, s, length);
+    newh->value[length] = '\0';
     /* Don't forget to allocate space for the string and copy it */
     /* What if either call to malloc returns NULL? */
+    /*
+     * if q is an empty queue, first insert
+     * will let tail and head point to same node
+     */
     newh->next = q->head;
     q->head = newh;
+    if (q->size == 0)
+        q->tail = q->head;
+    (q->size)++;
     return true;
 }
 
@@ -55,10 +86,36 @@ bool q_insert_head(queue_t *q, char *s)
  */
 bool q_insert_tail(queue_t *q, char *s)
 {
-    /* TODO: You need to write the complete code for this function */
     /* Remember: It should operate in O(1) time */
-    /* TODO: Remove the above comment when you are about to implement. */
-    return false;
+    list_ele_t *newt;
+    int length;
+    newt = malloc(sizeof(list_ele_t));
+    if (!newt) {
+        printf("Fail to malloc a new node\n");
+        return false;
+    }
+
+    length = strlen(s);
+    newt->value = malloc(length + 1);
+    if (!newt->value) {
+        printf("Fail to malloc value\n");
+        free(newt);
+        return false;
+    }
+    strncpy(newt->value, s, length);
+    newt->value[length] = '\0';
+    // avoid newt->next NULL deference
+    newt->next = NULL;
+
+    if (q->size == 0) {
+        q->head = q->tail = newt;
+    } else {
+        q->tail->next = newt;
+        q->tail = q->tail->next;
+    }
+
+    (q->size)++;
+    return true;
 }
 
 /*
@@ -73,7 +130,30 @@ bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
 {
     /* TODO: You need to fix up this code. */
     /* TODO: Remove the above comment when you are about to implement. */
+    if (!q || q->size == 0)
+        return false;
+
+    list_ele_t *old = q->head;
+    int length = strlen(old->value);
+    if (bufsize < length + 1)
+        length = bufsize - 1;
+    // for sp is pointed to an allocated space, no need to malloc again.
+    // sp = malloc(length + 1);
+    // if(!sp) {
+    //  	printf("sp malloc fail\n");
+    //  	return false;
+    // }
+    strncpy(sp, old->value, length);
+    sp[length] = '\0';
+
     q->head = q->head->next;
+    free(old->value);
+    free(old);
+
+    if (q->size == 1)
+        q->tail = q->head;
+    (q->size)--;
+
     return true;
 }
 
@@ -83,7 +163,7 @@ bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
  */
 int q_size(queue_t *q)
 {
-    if (q == NULL)
+    if (q == NULL || q->head == NULL)
         return 0;
     else
         return q->size;

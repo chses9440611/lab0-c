@@ -46,6 +46,8 @@ bool q_insert_head(queue_t *q, char *s)
 {
     list_ele_t *newh;
     int length;
+    if (!q)
+        return false;
 
     newh = malloc(sizeof(list_ele_t));
     if (!newh) {
@@ -89,6 +91,9 @@ bool q_insert_tail(queue_t *q, char *s)
     /* Remember: It should operate in O(1) time */
     list_ele_t *newt;
     int length;
+    if (!q)
+        return false;
+
     newt = malloc(sizeof(list_ele_t));
     if (!newt) {
         printf("Fail to malloc a new node\n");
@@ -130,7 +135,7 @@ bool q_remove_head(queue_t *q, char *sp, size_t bufsize)
 {
     /* TODO: You need to fix up this code. */
     /* TODO: Remove the above comment when you are about to implement. */
-    if (!q || q->size == 0)
+    if (!q || q->size == 0 || !sp)
         return false;
 
     list_ele_t *old = q->head;
@@ -180,6 +185,18 @@ void q_reverse(queue_t *q)
 {
     /* TODO: You need to write the code for this function */
     /* TODO: Remove the above comment when you are about to implement. */
+    if (q && q->size > 1) {
+        list_ele_t *left, *right;
+        q->tail = q->head;
+        left = q->head->next;
+        while (left != NULL) {
+            right = left->next;
+            left->next = q->head;
+            q->head = left;
+            left = right;
+        }
+        q->tail->next = NULL;
+    }
 }
 
 /*

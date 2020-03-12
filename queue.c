@@ -5,6 +5,11 @@
 #include "harness.h"
 #include "queue.h"
 
+
+/* Auxiliary function of q_sort */
+static list_ele_t *merge(list_ele_t *l1, list_ele_t *l2);
+static list_ele_t *merge_sort(list_ele_t *head);
+
 /*
  * Create empty queue.
  * Return NULL if could not allocate space.
@@ -271,7 +276,7 @@ void q_sort(queue_t *q)
         ;
 }
 
-list_ele_t *merge(list_ele_t *l1, list_ele_t *l2)
+static list_ele_t *merge(list_ele_t *l1, list_ele_t *l2)
 {
     int cmpResult = strcmp(l1->value, l2->value);
     list_ele_t *head, *tail;
@@ -303,7 +308,7 @@ list_ele_t *merge(list_ele_t *l1, list_ele_t *l2)
     return head;
 }
 
-list_ele_t *merge_sort(list_ele_t *head)
+static list_ele_t *merge_sort(list_ele_t *head)
 {
     if (!head || !head->next)
         return head;
